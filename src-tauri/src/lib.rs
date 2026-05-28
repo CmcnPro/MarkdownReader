@@ -2,6 +2,16 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const GITHUB_REPO: &str = "CmcnPro/MarkdownReader";
+
+#[derive(Debug, Serialize, Clone)]
+pub struct UpdateInfo {
+    pub has_update: bool,
+    pub current_version: String,
+    pub latest_version: String,
+    pub release_url: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
     pub theme: String,
@@ -164,6 +174,48 @@ fn file_exists(path: String) -> bool {
     Path::new(&path).exists()
 }
 
+#[derive(Deserialize)]
+struct GitHubRelease {
+    tag_name: String,
+    html_url: String,
+}
+
+#[tauri::command]
+async fn check_update(app: tauri::AppHandle) -> Result<UpdateInfo, String> {
+    let current_version = app.package_info().version.to_string();
+    let url = format!(
+        "https://api.github.com/repos/{}/releases/latest",
+        GITHUB_REPO
+    );
+
+    let client = reqwest::Client::builder()
+        .user_agent("MarkdownReader")
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let resp = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if !resp.status().is_success() {
+        return Err(format!("GitHub API returned status {}", resp.status()));
+    }
+
+    let release: GitHubRelease = resp.json().await.map_err(|e| e.to_string())?;
+
+    let latest = release.tag_name.trim_start_matches('v');
+    let has_update = latest != current_version;
+
+    Ok(UpdateInfo {
+        has_update,
+        current_version,
+        latest_version: latest.to_string(),
+        release_url: release.html_url,
+    })
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -179,6 +231,7 @@ pub fn run() {
             add_recent_file,
             clear_recent_files,
             file_exists,
+            check_update,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Markdown Reader");

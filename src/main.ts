@@ -6,7 +6,9 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 import { invoke } from "@tauri-apps/api/core";
 import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
+import { open as openUrl } from "@tauri-apps/plugin-shell";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getVersion } from "@tauri-apps/api/app";
 
 // ── Markdown-it setup ──
 const md: MarkdownIt = new MarkdownIt({
@@ -45,6 +47,9 @@ const elRecentList = $("recent-list");
 const elFontSizeDisplay = $("font-size-display");
 const elIconSun = $("icon-sun");
 const elIconMoon = $("icon-moon");
+const elAboutModal = $("about-modal");
+const elAboutVersion = $("about-version");
+const elAboutUpdateResult = $("about-update-result");
 
 // ── State ──
 let fontSize = 16;
@@ -93,6 +98,53 @@ async function openFile() {
     }
   } catch {
     // user cancelled
+  }
+}
+
+// ── About modal ──
+function openAbout() {
+  elAboutModal.classList.remove("hidden");
+  elAboutUpdateResult.classList.add("hidden");
+}
+
+function closeAbout() {
+  elAboutModal.classList.add("hidden");
+}
+
+async function checkUpdate() {
+  const btn = $("btn-check-update") as HTMLButtonElement;
+  btn.disabled = true;
+  btn.textContent = "检查中...";
+  elAboutUpdateResult.classList.remove("hidden", "has-update", "no-update", "error");
+  elAboutUpdateResult.textContent = "";
+
+  try {
+    const info = await invoke<{
+      has_update: boolean;
+      current_version: string;
+      latest_version: string;
+      release_url: string;
+    }>("check_update");
+
+    if (info.has_update) {
+      elAboutUpdateResult.classList.add("has-update");
+      elAboutUpdateResult.innerHTML =
+        `发现新版本 v${escapeHtml(info.latest_version)}！` +
+        `<br><a href="#" id="about-release-link">前往下载</a>`;
+      $("about-release-link").addEventListener("click", (e) => {
+        e.preventDefault();
+        openUrl(info.release_url);
+      });
+    } else {
+      elAboutUpdateResult.classList.add("no-update");
+      elAboutUpdateResult.textContent = `已是最新版本 v${info.current_version}`;
+    }
+  } catch (e) {
+    elAboutUpdateResult.classList.add("error");
+    elAboutUpdateResult.textContent = `检查失败：${String(e)}`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "检查更新";
   }
 }
 
@@ -211,6 +263,13 @@ document.addEventListener("click", (e) => {
   }
 });
 
+// ── Close About modal on overlay click ──
+elAboutModal.addEventListener("click", (e) => {
+  if (e.target === elAboutModal) {
+    closeAbout();
+  }
+});
+
 // ── Keyboard shortcuts ──
 document.addEventListener("keydown", async (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "o") {
@@ -219,6 +278,7 @@ document.addEventListener("keydown", async (e) => {
   }
   if (e.key === "Escape") {
     elRecentPanel.classList.add("hidden");
+    closeAbout();
   }
 });
 
@@ -230,8 +290,13 @@ $("btn-theme").addEventListener("click", toggleTheme);
 $("btn-font-minus").addEventListener("click", () => changeFontSize(-1));
 $("btn-font-plus").addEventListener("click", () => changeFontSize(1));
 $("btn-retry").addEventListener("click", openFile);
+$("btn-about").addEventListener("click", openAbout);
+$("btn-about-close").addEventListener("click", closeAbout);
+$("btn-check-update").addEventListener("click", checkUpdate);
 
 // ── Init ──
+const GITHUB_URL = "https://github.com/CmcnPro/MarkdownReader";
+
 async function init() {
   try {
     const settings = await invoke<{
@@ -245,6 +310,20 @@ async function init() {
   } catch {
     // use defaults
   }
+
+  // Set About version
+  try {
+    const version = await getVersion();
+    elAboutVersion.textContent = `v${version}`;
+  } catch {
+    // keep default
+  }
+
+  // Set GitHub link
+  $("about-github").addEventListener("click", (e) => {
+    e.preventDefault();
+    openUrl(GITHUB_URL);
+  });
 
   applyTheme();
   applyFontSize();
