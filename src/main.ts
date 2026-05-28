@@ -55,9 +55,7 @@ const elIconWide = $("icon-wide");
 
 // ── State ──
 let fontSize = 16;
-let lineWidth = 780;
-const LINE_WIDTH_NARROW = 780;
-const LINE_WIDTH_WIDE = 1100;
+let widthMode: "narrow" | "wide" = "narrow";
 let theme: "light" | "dark" = "light";
 
 // ── Helpers ──
@@ -245,17 +243,21 @@ function applyFontSize() {
 
 // ── Line width ──
 async function toggleWidth() {
-  lineWidth = lineWidth === LINE_WIDTH_NARROW ? LINE_WIDTH_WIDE : LINE_WIDTH_NARROW;
+  widthMode = widthMode === "narrow" ? "wide" : "narrow";
   applyLineWidth();
   const settings = await invoke<Record<string, unknown>>("get_settings");
-  settings.lineWidth = lineWidth;
+  settings.lineWidth = widthMode === "wide" ? 1100 : 780;
   await invoke("save_settings", { settings });
 }
 
 function applyLineWidth() {
-  document.documentElement.style.setProperty("--line-width", `${lineWidth}px`);
-  elIconNarrow.style.display = lineWidth === LINE_WIDTH_WIDE ? "" : "none";
-  elIconWide.style.display = lineWidth === LINE_WIDTH_NARROW ? "" : "none";
+  const isWide = widthMode === "wide";
+  document.documentElement.style.setProperty(
+    "--content-width",
+    isWide ? "min(90%, 1200px)" : "min(65%, 780px)"
+  );
+  elIconNarrow.style.display = isWide ? "" : "none";
+  elIconWide.style.display = isWide ? "none" : "";
 }
 
 // ── Escape HTML ──
@@ -321,7 +323,7 @@ async function init() {
     }>("get_settings");
     theme = settings.theme === "dark" ? "dark" : "light";
     fontSize = settings.font_size || 16;
-    lineWidth = settings.line_width || LINE_WIDTH_NARROW;
+    widthMode = (settings.line_width || 780) > 900 ? "wide" : "narrow";
   } catch {
     // use defaults
   }

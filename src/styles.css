@@ -343,7 +343,7 @@ body {
 
 /* Markdown body */
 .markdown-body {
-  max-width: var(--line-width, 780px);
+  max-width: var(--content-width, min(65%, 780px));
   margin: 0 auto;
   padding: 40px 48px 80px;
   font-size: var(--font-size, 16px);
