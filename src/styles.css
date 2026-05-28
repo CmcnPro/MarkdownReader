@@ -84,6 +84,8 @@ body {
   flex-shrink: 0;
   -webkit-app-region: drag;
   user-select: none;
+  position: relative;
+  z-index: 10;
   transition: background var(--transition), border-color var(--transition);
 }
 
@@ -92,6 +94,42 @@ body {
   align-items: center;
   gap: 8px;
   -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 11;
+}
+
+.window-controls {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-left: 4px;
+  -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 12;
+}
+
+.window-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.window-btn:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.window-btn.close:hover {
+  background: #e81123;
+  color: #ffffff;
 }
 
 .app-title {
@@ -168,6 +206,11 @@ body {
 
 .toolbar-btn.icon-only {
   padding: 6px 8px;
+}
+
+#btn-language span {
+  min-width: 38px;
+  text-align: center;
 }
 
 .toolbar-btn span {
@@ -709,6 +752,28 @@ body {
 
 .about-update-result a:hover {
   text-decoration: underline;
+}
+
+/* Decorum overlay titlebar */
+[data-tauri-decorum-tb] {
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--toolbar-border);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.decorum-tb-btn {
+  color: var(--fg-secondary) !important;
+  transition: all var(--transition) !important;
+}
+
+.decorum-tb-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--fg) !important;
+}
+
+#decorum-tb-close:hover {
+  background: #e81123 !important;
+  color: #ffffff !important;
 }
 
 /* Hidden helper */

@@ -4,6 +4,8 @@
 
 A lightweight, portable Markdown reader built with Rust and Tauri 2. Designed for sharing `.md` files with others — just drag, drop, and read.
 
+Current release: v0.1.2.
+
 > **This is a 100% vibe-coded project.** The entire codebase — frontend, backend, documentation, and build configuration — was generated through AI-assisted coding (Claude Code) with zero manual code editing. No human-written code exists in this repository.
 
 ## Features
@@ -31,7 +33,7 @@ A lightweight, portable Markdown reader built with Rust and Tauri 2. Designed fo
 
 ### Download
 
-Go to [Releases](https://github.com/CmcnPro/MarkdownReader/releases) and download the latest `.exe` or portable package.
+Go to [Releases](https://github.com/CmcnPro/MarkdownReader/releases) and download the latest `.exe` or portable package for v0.1.2.
 
 ### Build from Source
 

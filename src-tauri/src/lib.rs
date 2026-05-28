@@ -17,6 +17,7 @@ pub struct UpdateInfo {
 #[serde(default)]
 pub struct AppSettings {
     pub theme: String,
+    pub language: String,
     pub font_size: u32,
     pub line_width: u32,
     pub font_family: String,
@@ -26,6 +27,7 @@ impl Default for AppSettings {
     fn default() -> Self {
         Self {
             theme: "light".into(),
+            language: "zh-CN".into(),
             font_size: 16,
             line_width: 780,
             font_family: "system".into(),

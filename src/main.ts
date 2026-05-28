@@ -48,11 +48,15 @@ const elFontFamilySelect = $("font-family-select") as HTMLSelectElement;
 const elFontSizeDisplay = $("font-size-display");
 const elIconSun = $("icon-sun");
 const elIconMoon = $("icon-moon");
+const elLanguageLabel = $("language-label");
 const elAboutModal = $("about-modal");
 const elAboutVersion = $("about-version");
 const elAboutUpdateResult = $("about-update-result");
 const elIconNarrow = $("icon-narrow");
 const elIconWide = $("icon-wide");
+const elBtnMaximize = $("btn-maximize") as HTMLButtonElement;
+const elIconMaximize = $("icon-maximize");
+const elIconRestore = $("icon-restore");
 
 // ── State ──
 const DEFAULT_FONT_SANS = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", Helvetica, Arial, sans-serif';
@@ -62,6 +66,85 @@ let fontFamily = "system";
 let systemFonts: string[] = [];
 let widthMode: "narrow" | "wide" = "narrow";
 let theme: "light" | "dark" = "light";
+let language: "zh-CN" | "en-US" = "zh-CN";
+
+type LangKey = "zh-CN" | "en-US";
+
+const I18N: Record<LangKey, Record<string, string>> = {
+  "zh-CN": {
+    appTitle: "Markdown Reader",
+    open: "打开",
+    openFile: "打开文件",
+    recent: "最近文件",
+    clear: "清空",
+    font: "切换字体",
+    smaller: "缩小字号",
+    bigger: "放大字号",
+    width: "切换宽窄屏",
+    about: "关于",
+    theme: "切换主题",
+    language: "中/EN",
+    minimize: "最小化",
+    maximize: "最大化",
+    restore: "还原",
+    close: "关闭",
+    openMarkdown: "打开一个 Markdown 文件",
+    hint: "拖放 .md 文件到这里，或点击上方「打开」按钮",
+    retry: "重新打开",
+    checkUpdate: "检查更新",
+    checking: "检查中...",
+    noRecent: "暂无最近文件",
+    selectedFont: "系统字体",
+    latestVersion: "已是最新版本",
+    checkFailed: "检查失败",
+    openingFile: "打开 Markdown 文件",
+    allFiles: "所有文件",
+    configFolder: "配置文件夹",
+    aboutTitle: "关于 Markdown Reader",
+    dropHint: "释放文件以打开",
+    loadFailed: "加载失败",
+    download: "前往下载",
+    newVersionFound: "发现新版本",
+    openConfig: "打开配置文件夹",
+    settingsLanguage: "zh-CN",
+  },
+  "en-US": {
+    appTitle: "Markdown Reader",
+    open: "Open",
+    openFile: "Open file",
+    recent: "Recent",
+    clear: "Clear",
+    font: "Font",
+    smaller: "Smaller",
+    bigger: "Bigger",
+    width: "Width",
+    about: "About",
+    theme: "Theme",
+    language: "中/EN",
+    minimize: "Minimize",
+    maximize: "Maximize",
+    restore: "Restore",
+    close: "Close",
+    openMarkdown: "Open a Markdown file",
+    hint: "Drop a .md file here or click Open",
+    retry: "Reopen",
+    loading: "Checking...",
+    checkUpdate: "Check updates",
+    checking: "Checking...",
+    noRecent: "No recent files",
+    selectedFont: "System font",
+    latestVersion: "You are on the latest version",
+    checkFailed: "Check failed",
+    openingFile: "Open Markdown file",
+    allFiles: "All files",
+    openConfig: "Open config folder",
+    settingsLanguage: "en-US",
+  },
+};
+
+function t(key: string) {
+  return I18N[language][key] ?? key;
+}
 
 // ── Helpers ──
 function showView(view: "empty" | "error" | "content") {
@@ -69,6 +152,41 @@ function showView(view: "empty" | "error" | "content") {
   elError.classList.toggle("hidden", view !== "error");
   elBody.classList.toggle("hidden", view !== "content");
 }
+
+function applyLanguage() {
+  const dict = I18N[language];
+  document.querySelector(".app-title")!.textContent = dict.appTitle;
+  $("btn-open").querySelector("span")!.textContent = dict.open;
+  $("btn-open").title = dict.openFile;
+  $("btn-recent").title = dict.recent;
+  $("recent-title")!.textContent = dict.recent;
+  $("btn-clear-recent").title = dict.clear;
+  $("btn-font-minus").title = dict.smaller;
+  $("btn-font-plus").title = dict.bigger;
+  $("btn-width").title = dict.width;
+  $("btn-about").title = dict.about;
+  $("btn-theme").title = dict.theme;
+  elLanguageLabel.textContent = dict.language;
+  $("btn-minimize").title = dict.minimize;
+  $("btn-maximize").title = dict.maximize;
+  $("btn-close").title = dict.close;
+  $("btn-retry").textContent = dict.retry;
+  elEmpty.querySelector(".empty-title")!.textContent = dict.openMarkdown;
+  elEmpty.querySelector(".empty-hint")!.textContent = dict.hint;
+  $("btn-check-update").textContent = dict.checkUpdate;
+  $("btn-about-close").title = dict.close;
+  $("open-config-label")!.textContent = dict.openConfig;
+  elFontFamilySelect.title = dict.font;
+  elErrorMsg.textContent = language === "zh-CN" ? dict.loadFailed : "Load failed";
+  $("btn-font-minus").title = dict.smaller;
+  $("btn-font-plus").title = dict.bigger;
+  $("btn-width").title = dict.width;
+  $("btn-about").title = dict.about;
+  $("btn-theme").title = dict.theme;
+  $("about-title")!.textContent = dict.aboutTitle;
+  $("drop-hint")!.textContent = dict.dropHint;
+}
+
 
 async function loadFile(path: string) {
   try {
@@ -93,10 +211,10 @@ async function loadFile(path: string) {
 async function openFile() {
   try {
     const selected = await openFileDialog({
-      title: "打开 Markdown 文件",
+      title: t("openingFile"),
       filters: [
         { name: "Markdown", extensions: ["md", "markdown", "mdown", "mkd"] },
-        { name: "所有文件", extensions: ["*"] },
+        { name: t("allFiles"), extensions: ["*"] },
       ],
       multiple: false,
     });
@@ -125,7 +243,7 @@ function closeAbout() {
 async function checkUpdate() {
   const btn = $("btn-check-update") as HTMLButtonElement;
   btn.disabled = true;
-  btn.textContent = "检查中...";
+  btn.textContent = t("checking");
   elAboutUpdateResult.classList.remove("hidden", "has-update", "no-update", "error");
   elAboutUpdateResult.textContent = "";
 
@@ -140,22 +258,24 @@ async function checkUpdate() {
     if (info.has_update) {
       elAboutUpdateResult.classList.add("has-update");
       elAboutUpdateResult.innerHTML =
-        `发现新版本 v${escapeHtml(info.latest_version)}！` +
-        `<br><a href="#" id="about-release-link">前往下载</a>`;
+        (language === "zh-CN"
+          ? `${t("newVersionFound")} v${escapeHtml(info.latest_version)}！`
+          : `${t("newVersionFound")} v${escapeHtml(info.latest_version)}!`) +
+        `<br><a href="#" id="about-release-link">${t("download")}</a>`;
       $("about-release-link").addEventListener("click", (e) => {
         e.preventDefault();
         openUrl(info.release_url);
       });
     } else {
       elAboutUpdateResult.classList.add("no-update");
-      elAboutUpdateResult.textContent = `已是最新版本 v${info.current_version}`;
+      elAboutUpdateResult.textContent = `v${info.current_version} ${t("latestVersion")}`;
     }
   } catch (e) {
     elAboutUpdateResult.classList.add("error");
-    elAboutUpdateResult.textContent = `检查失败：${String(e)}`;
+    elAboutUpdateResult.textContent = `${t("checkFailed")}: ${String(e)}`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "检查更新";
+    btn.textContent = t("checkUpdate");
   }
 }
 
@@ -189,7 +309,7 @@ async function renderRecentFiles() {
   );
 
   if (files.length === 0) {
-    elRecentList.innerHTML = '<li class="recent-empty">暂无最近文件</li>';
+    elRecentList.innerHTML = `<li class="recent-empty">${t("noRecent")}</li>`;
     return;
   }
 
@@ -227,6 +347,14 @@ async function toggleTheme() {
   applyTheme();
   const settings = await invoke<Record<string, unknown>>("get_settings");
   settings.theme = theme;
+  await invoke("save_settings", { settings });
+}
+
+async function toggleLanguage() {
+  language = language === "zh-CN" ? "en-US" : "zh-CN";
+  applyLanguage();
+  const settings = await invoke<Record<string, unknown>>("get_settings");
+  settings.language = language;
   await invoke("save_settings", { settings });
 }
 
@@ -287,11 +415,19 @@ function applyLineWidth() {
   elIconWide.style.display = isWide ? "none" : "";
 }
 
+async function syncWindowButtons() {
+  const maximized = await appWindow.isMaximized();
+  elIconMaximize.style.display = maximized ? "none" : "";
+  elIconRestore.style.display = maximized ? "" : "none";
+  elBtnMaximize.title = maximized ? t("restore") : t("maximize");
+  elBtnMaximize.setAttribute("aria-label", maximized ? t("restore") : t("maximize"));
+}
+
 async function loadSystemFonts() {
   systemFonts = await invoke<string[]>("list_system_fonts");
   const options = ["system", ...systemFonts];
   elFontFamilySelect.innerHTML = options
-    .map((font) => `<option value="${escapeHtml(font)}">${escapeHtml(font === "system" ? "系统字体" : font)}</option>`)
+    .map((font) => `<option value="${escapeHtml(font)}">${escapeHtml(font === "system" ? t("selectedFont") : font)}</option>`)
     .join("");
 
   if (fontFamily !== "system" && !systemFonts.includes(fontFamily)) {
@@ -342,11 +478,18 @@ document.addEventListener("keydown", async (e) => {
 $("btn-open").addEventListener("click", openFile);
 $("btn-recent").addEventListener("click", toggleRecentPanel);
 $("btn-clear-recent").addEventListener("click", clearRecentFiles);
+$("btn-language").addEventListener("click", toggleLanguage);
 $("btn-theme").addEventListener("click", toggleTheme);
 $("btn-font-minus").addEventListener("click", () => changeFontSize(-1));
 $("btn-font-plus").addEventListener("click", () => changeFontSize(1));
 $("btn-retry").addEventListener("click", openFile);
 $("btn-width").addEventListener("click", toggleWidth);
+$("btn-minimize").addEventListener("click", () => appWindow.minimize());
+$("btn-maximize").addEventListener("click", async () => {
+  await appWindow.toggleMaximize();
+  await syncWindowButtons();
+});
+$("btn-close").addEventListener("click", () => appWindow.close());
 elFontFamilySelect.addEventListener("change", (e) => changeFontFamily((e.target as HTMLSelectElement).value));
 $("btn-about").addEventListener("click", openAbout);
 $("btn-about-close").addEventListener("click", closeAbout);
@@ -360,11 +503,13 @@ async function init() {
   try {
     const settings = await invoke<{
       theme: string;
+      language: string;
       font_size: number;
       line_width: number;
       font_family: string;
     }>("get_settings");
     theme = settings.theme === "dark" ? "dark" : "light";
+    language = settings.language === "en-US" ? "en-US" : "zh-CN";
     fontSize = settings.font_size || 16;
     widthMode = (settings.line_width || 780) >= 960 ? "wide" : "narrow";
     fontFamily = settings.font_family || "system";
@@ -390,10 +535,13 @@ async function init() {
   elFontFamilySelect.value = fontFamily;
 
   applyTheme();
+  applyLanguage();
   applyFontSize();
   applyFontFamily();
   applyLineWidth();
+  await syncWindowButtons();
   window.addEventListener("resize", applyLineWidth);
+  appWindow.onResized(syncWindowButtons);
   showView("empty");
 }
 
