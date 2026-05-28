@@ -136,6 +136,27 @@ body {
   white-space: nowrap;
 }
 
+.toolbar-select {
+  height: 30px;
+  max-width: 180px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--fg-secondary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.toolbar-select:hover,
+.toolbar-select:focus {
+  background: var(--bg-hover);
+  color: var(--fg);
+  outline: none;
+}
+
 .toolbar-btn:hover {
   background: var(--bg-hover);
   color: var(--fg);
@@ -343,13 +364,13 @@ body {
 
 /* Markdown body */
 .markdown-body {
-  max-width: var(--content-width, min(65%, 780px));
+  max-width: var(--content-width, 780px);
   margin: 0 auto;
   padding: 40px 48px 80px;
   font-size: var(--font-size, 16px);
   line-height: 1.75;
   color: var(--fg);
-  transition: font-size var(--transition);
+  transition: font-size var(--transition), max-width var(--transition);
 }
 
 .markdown-body h1,

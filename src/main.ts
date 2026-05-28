@@ -44,6 +44,7 @@ const elBody = $("markdown-body");
 const elDropOverlay = $("drop-overlay");
 const elRecentPanel = $("recent-panel");
 const elRecentList = $("recent-list");
+const elFontFamilySelect = $("font-family-select") as HTMLSelectElement;
 const elFontSizeDisplay = $("font-size-display");
 const elIconSun = $("icon-sun");
 const elIconMoon = $("icon-moon");
@@ -54,7 +55,11 @@ const elIconNarrow = $("icon-narrow");
 const elIconWide = $("icon-wide");
 
 // ── State ──
+const DEFAULT_FONT_SANS = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", Helvetica, Arial, sans-serif';
+
 let fontSize = 16;
+let fontFamily = "system";
+let systemFonts: string[] = [];
 let widthMode: "narrow" | "wide" = "narrow";
 let theme: "light" | "dark" = "light";
 
@@ -107,6 +112,10 @@ async function openFile() {
 function openAbout() {
   elAboutModal.classList.remove("hidden");
   elAboutUpdateResult.classList.add("hidden");
+}
+
+async function openConfigFolder() {
+  await invoke("open_config_dir");
 }
 
 function closeAbout() {
@@ -232,7 +241,15 @@ async function changeFontSize(delta: number) {
   fontSize = Math.max(12, Math.min(24, fontSize + delta));
   applyFontSize();
   const settings = await invoke<Record<string, unknown>>("get_settings");
-  settings.fontSize = fontSize;
+  settings.font_size = fontSize;
+  await invoke("save_settings", { settings });
+}
+
+async function changeFontFamily(value: string) {
+  fontFamily = value;
+  applyFontFamily();
+  const settings = await invoke<Record<string, unknown>>("get_settings");
+  settings.font_family = fontFamily;
   await invoke("save_settings", { settings });
 }
 
@@ -241,23 +258,46 @@ function applyFontSize() {
   elFontSizeDisplay.textContent = `${fontSize}px`;
 }
 
+function applyFontFamily() {
+  const family =
+    fontFamily === "system" ? DEFAULT_FONT_SANS : `"${fontFamily.replace(/"/g, '\\"')}", ${DEFAULT_FONT_SANS}`;
+  document.documentElement.style.setProperty("--font-sans", family);
+  document.body.style.fontFamily = family;
+  elFontFamilySelect.value = fontFamily;
+}
+
 // ── Line width ──
 async function toggleWidth() {
   widthMode = widthMode === "narrow" ? "wide" : "narrow";
   applyLineWidth();
   const settings = await invoke<Record<string, unknown>>("get_settings");
-  settings.lineWidth = widthMode === "wide" ? 1100 : 780;
+  settings.line_width = widthMode === "wide" ? 1100 : 780;
   await invoke("save_settings", { settings });
 }
 
 function applyLineWidth() {
   const isWide = widthMode === "wide";
-  document.documentElement.style.setProperty(
-    "--content-width",
-    isWide ? "min(90%, 1200px)" : "min(65%, 780px)"
-  );
+  const windowWidth = window.innerWidth;
+  const contentWidth = isWide
+    ? Math.min(Math.max(windowWidth * 0.88, 960), 2400)
+    : Math.min(Math.max(windowWidth * 0.66, 720), 1400);
+
+  document.documentElement.style.setProperty("--content-width", `${Math.round(contentWidth)}px`);
   elIconNarrow.style.display = isWide ? "" : "none";
   elIconWide.style.display = isWide ? "none" : "";
+}
+
+async function loadSystemFonts() {
+  systemFonts = await invoke<string[]>("list_system_fonts");
+  const options = ["system", ...systemFonts];
+  elFontFamilySelect.innerHTML = options
+    .map((font) => `<option value="${escapeHtml(font)}">${escapeHtml(font === "system" ? "系统字体" : font)}</option>`)
+    .join("");
+
+  if (fontFamily !== "system" && !systemFonts.includes(fontFamily)) {
+    fontFamily = "system";
+  }
+  applyFontFamily();
 }
 
 // ── Escape HTML ──
@@ -307,9 +347,11 @@ $("btn-font-minus").addEventListener("click", () => changeFontSize(-1));
 $("btn-font-plus").addEventListener("click", () => changeFontSize(1));
 $("btn-retry").addEventListener("click", openFile);
 $("btn-width").addEventListener("click", toggleWidth);
+elFontFamilySelect.addEventListener("change", (e) => changeFontFamily((e.target as HTMLSelectElement).value));
 $("btn-about").addEventListener("click", openAbout);
 $("btn-about-close").addEventListener("click", closeAbout);
 $("btn-check-update").addEventListener("click", checkUpdate);
+$("btn-open-config").addEventListener("click", openConfigFolder);
 
 // ── Init ──
 const GITHUB_URL = "https://github.com/CmcnPro/MarkdownReader";
@@ -320,10 +362,12 @@ async function init() {
       theme: string;
       font_size: number;
       line_width: number;
+      font_family: string;
     }>("get_settings");
     theme = settings.theme === "dark" ? "dark" : "light";
     fontSize = settings.font_size || 16;
-    widthMode = (settings.line_width || 780) > 900 ? "wide" : "narrow";
+    widthMode = (settings.line_width || 780) >= 960 ? "wide" : "narrow";
+    fontFamily = settings.font_family || "system";
   } catch {
     // use defaults
   }
@@ -342,9 +386,14 @@ async function init() {
     openUrl(GITHUB_URL);
   });
 
+  await loadSystemFonts();
+  elFontFamilySelect.value = fontFamily;
+
   applyTheme();
   applyFontSize();
+  applyFontFamily();
   applyLineWidth();
+  window.addEventListener("resize", applyLineWidth);
   showView("empty");
 }
 

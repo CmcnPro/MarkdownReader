@@ -15,13 +15,17 @@ A lightweight, portable Markdown reader built with Rust and Tauri 2. Designed fo
 - LaTeX math formula support (KaTeX)
 - Light and dark themes
 - Adjustable font size
+- System font switching
 - Recent files history
 - Check for updates from GitHub Releases
+- Open the config folder from About
 - Portable — no installation required, config stored in user directory
 
 ## Screenshot
 
-<!-- TODO: Add screenshot -->
+![Overview](docs/screenshots/01-overview.png)
+![Math](docs/screenshots/02-math.png)
+![Quote and code](docs/screenshots/03-quote-code.png)
 
 ## Installation
 

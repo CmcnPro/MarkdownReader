@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 const GITHUB_REPO: &str = "CmcnPro/MarkdownReader";
 
@@ -13,10 +14,12 @@ pub struct UpdateInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct AppSettings {
     pub theme: String,
     pub font_size: u32,
     pub line_width: u32,
+    pub font_family: String,
 }
 
 impl Default for AppSettings {
@@ -25,6 +28,7 @@ impl Default for AppSettings {
             theme: "light".into(),
             font_size: 16,
             line_width: 780,
+            font_family: "system".into(),
         }
     }
 }
@@ -174,6 +178,36 @@ fn file_exists(path: String) -> bool {
     Path::new(&path).exists()
 }
 
+#[tauri::command]
+fn list_system_fonts() -> Vec<String> {
+    let mut db = fontdb::Database::new();
+    db.load_system_fonts();
+
+    let mut fonts = db
+        .faces()
+        .flat_map(|face| face.families.iter().map(|(name, _)| name.clone()))
+        .collect::<Vec<_>>();
+
+    fonts.sort();
+    fonts.dedup();
+    fonts
+}
+
+#[tauri::command]
+fn get_config_dir() -> String {
+    config_dir().to_string_lossy().to_string()
+}
+
+#[tauri::command]
+fn open_config_dir() -> Result<(), String> {
+    let dir = config_dir();
+    Command::new("explorer")
+        .arg(dir)
+        .spawn()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+
 #[derive(Deserialize)]
 struct GitHubRelease {
     tag_name: String,
@@ -231,6 +265,9 @@ pub fn run() {
             add_recent_file,
             clear_recent_files,
             file_exists,
+            list_system_fonts,
+            get_config_dir,
+            open_config_dir,
             check_update,
         ])
         .run(tauri::generate_context!())

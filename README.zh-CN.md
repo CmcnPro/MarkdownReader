@@ -15,13 +15,17 @@
 - LaTeX 数学公式支持（KaTeX）
 - 亮色 / 暗色主题切换
 - 字号调整
+- 系统字体切换
 - 最近文件历史
 - 检查 GitHub Releases 新版本更新
+- 在 About 中打开配置文件夹
 - 便携免安装，配置存储在用户目录
 
 ## 截图
 
-<!-- TODO: 添加截图 -->
+![总览](docs/screenshots/01-overview.png)
+![数学公式](docs/screenshots/02-math.png)
+![引用和代码块](docs/screenshots/03-quote-code.png)
 
 ## 安装
 
