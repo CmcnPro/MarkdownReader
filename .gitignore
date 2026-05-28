@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+
+# Generated icons (keep source icon.png only)
+src-tauri/icons/*
+!src-tauri/icons/icon.png
+
+# Tauri generated schemas
+src-tauri/gen/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Rust
+*.pdb
+
+# Test files
+test.md
