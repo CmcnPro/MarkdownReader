@@ -50,10 +50,14 @@ const elIconMoon = $("icon-moon");
 const elAboutModal = $("about-modal");
 const elAboutVersion = $("about-version");
 const elAboutUpdateResult = $("about-update-result");
+const elIconNarrow = $("icon-narrow");
+const elIconWide = $("icon-wide");
 
 // ── State ──
 let fontSize = 16;
 let lineWidth = 780;
+const LINE_WIDTH_NARROW = 780;
+const LINE_WIDTH_WIDE = 1100;
 let theme: "light" | "dark" = "light";
 
 // ── Helpers ──
@@ -240,8 +244,18 @@ function applyFontSize() {
 }
 
 // ── Line width ──
+async function toggleWidth() {
+  lineWidth = lineWidth === LINE_WIDTH_NARROW ? LINE_WIDTH_WIDE : LINE_WIDTH_NARROW;
+  applyLineWidth();
+  const settings = await invoke<Record<string, unknown>>("get_settings");
+  settings.lineWidth = lineWidth;
+  await invoke("save_settings", { settings });
+}
+
 function applyLineWidth() {
   document.documentElement.style.setProperty("--line-width", `${lineWidth}px`);
+  elIconNarrow.style.display = lineWidth === LINE_WIDTH_WIDE ? "" : "none";
+  elIconWide.style.display = lineWidth === LINE_WIDTH_NARROW ? "" : "none";
 }
 
 // ── Escape HTML ──
@@ -290,6 +304,7 @@ $("btn-theme").addEventListener("click", toggleTheme);
 $("btn-font-minus").addEventListener("click", () => changeFontSize(-1));
 $("btn-font-plus").addEventListener("click", () => changeFontSize(1));
 $("btn-retry").addEventListener("click", openFile);
+$("btn-width").addEventListener("click", toggleWidth);
 $("btn-about").addEventListener("click", openAbout);
 $("btn-about-close").addEventListener("click", closeAbout);
 $("btn-check-update").addEventListener("click", checkUpdate);
@@ -306,7 +321,7 @@ async function init() {
     }>("get_settings");
     theme = settings.theme === "dark" ? "dark" : "light";
     fontSize = settings.font_size || 16;
-    lineWidth = settings.line_width || 780;
+    lineWidth = settings.line_width || LINE_WIDTH_NARROW;
   } catch {
     // use defaults
   }
