@@ -305,6 +305,7 @@ body {
 
 .menu-select {
   flex: 1;
+  max-width: 140px;
   height: 28px;
   padding: 0 24px 0 8px;
   border: 1px solid var(--border);
