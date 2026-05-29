@@ -6,7 +6,6 @@
 
 一个基于 Rust + Tauri 2 构建的轻量级 Markdown 桌面阅读器，专为分享 `.md` 文件而设计 — 拖拽即可阅读。
 
-当前版本：v0.1.2。
 
 > **这是一个 100% Vibe Coding 的项目。** 整个代码库——前端、后端、文档和构建配置——全部通过 AI 辅助编程（Claude Code）生成，没有任何一行人工手写代码。
 
@@ -36,7 +35,7 @@
 
 ### 下载
 
-前往 [Releases](https://github.com/CmcnPro/MarkdownReader/releases) 页面下载 v0.1.2 的最新安装包：
+前往 [Releases](https://github.com/CmcnPro/MarkdownReader/releases) 页面下载最新安装包：
 - **Windows**：`.exe` 安装包或便携版
 - **macOS**：`.dmg` 或 `.app` 应用包
 
