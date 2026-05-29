@@ -33,11 +33,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
 
       - name: Install dependencies (macOS)
         if: matrix.platform == 'macos-latest'
@@ -45,7 +51,7 @@ jobs:
           rustup target add aarch64-apple-darwin
 
       - name: Install frontend dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Tauri app
         run: npm run tauri build -- --target ${{ matrix.target }}
