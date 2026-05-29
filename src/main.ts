@@ -33,6 +33,35 @@ md.use(texmath, {
   katexOptions: { throwOnError: false },
 });
 
+function slugify(text: string) {
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[\s]+/g, "-")
+    .replace(/[^\w一-龥\-]/g, "")
+    .replace(/-+/g, "-");
+}
+
+md.core.ruler.push("heading_ids", (state) => {
+  const slugs = new Map<string, number>();
+
+  for (let i = 0; i < state.tokens.length; i++) {
+    const token = state.tokens[i];
+    if (token.type !== "heading_open") continue;
+
+    const inline = state.tokens[i + 1];
+    if (!inline || inline.type !== "inline") continue;
+
+    const text = inline.content;
+    const base = slugify(text) || "section";
+    const count = slugs.get(base) ?? 0;
+    slugs.set(base, count + 1);
+    const id = count === 0 ? base : `${base}-${count + 1}`;
+
+    token.attrSet("id", id);
+  }
+});
+
 // ── DOM refs ──
 const $ = (id: string) => document.getElementById(id)!;
 
@@ -513,6 +542,23 @@ document.addEventListener("keydown", async (e) => {
     elMenuPanel.classList.add("hidden");
     closeAbout();
   }
+});
+
+document.addEventListener("click", (e) => {
+  const target = e.target as HTMLElement;
+  const anchor = target.closest("a[href^='#']") as HTMLAnchorElement | null;
+  if (!anchor) return;
+
+  const href = anchor.getAttribute("href");
+  if (!href || href === "#") return;
+
+  const id = decodeURIComponent(href.slice(1));
+  const heading = document.getElementById(id);
+  if (!heading) return;
+
+  e.preventDefault();
+  heading.scrollIntoView({ behavior: "smooth", block: "start" });
+  history.replaceState(null, "", href);
 });
 
 // ── Button bindings ──
