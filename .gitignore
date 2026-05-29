@@ -5,9 +5,8 @@ node_modules/
 dist/
 src-tauri/target/
 
-# Generated icons (keep source icon.png only)
-src-tauri/icons/*
-!src-tauri/icons/icon.png
+# Tauri icons are committed to ensure CI builds work
+# If you need to regenerate icons, run: npm run tauri icon
 
 # Tauri generated schemas
 src-tauri/gen/

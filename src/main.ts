@@ -206,10 +206,18 @@ function applyLanguage() {
 }
 
 
+function normalizeFilePath(path: string) {
+  if (path.startsWith("file://")) {
+    return decodeURIComponent(new URL(path).pathname);
+  }
+  return path;
+}
+
 async function loadFile(path: string) {
   try {
-    const content = await invoke<string>("read_markdown_file", { path });
-    const fileName = await invoke<string>("get_file_name", { path });
+    const filePath = normalizeFilePath(path);
+    const content = await invoke<string>("read_markdown_file", { path: filePath });
+    const fileName = await invoke<string>("get_file_name", { path: filePath });
 
     elFileName.textContent = fileName;
     document.title = `${fileName} — Markdown Reader`;
@@ -306,7 +314,7 @@ appWindow.onDragDropEvent((event) => {
     elDropOverlay.classList.add("hidden");
     const paths = event.payload.paths;
     if (paths && paths.length > 0) {
-      loadFile(paths[0]);
+      loadFile(normalizeFilePath(paths[0]));
     }
   } else if (event.payload.type === "leave") {
     elDropOverlay.classList.add("hidden");
