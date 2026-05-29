@@ -44,11 +44,11 @@ const elBody = $("markdown-body");
 const elDropOverlay = $("drop-overlay");
 const elRecentPanel = $("recent-panel");
 const elRecentList = $("recent-list");
-const elFontFamilySelect = $("font-family-select") as HTMLSelectElement;
+const elMenuPanel = $("menu-panel");
+const elMenuFontSelect = $("menu-font-select") as HTMLSelectElement;
 const elFontSizeDisplay = $("font-size-display");
 const elIconSun = $("icon-sun");
 const elIconMoon = $("icon-moon");
-const elLanguageLabel = $("language-label");
 const elAboutModal = $("about-modal");
 const elAboutVersion = $("about-version");
 const elAboutUpdateResult = $("about-update-result");
@@ -107,6 +107,15 @@ const I18N: Record<LangKey, Record<string, string>> = {
     newVersionFound: "发现新版本",
     openConfig: "打开配置文件夹",
     settingsLanguage: "zh-CN",
+    menu: "菜单",
+    menuFont: "字体",
+    menuTheme: "主题",
+    menuLanguage: "语言",
+    menuAbout: "关于",
+    themeLight: "浅色",
+    themeDark: "深色",
+    langChinese: "中文",
+    langEnglish: "English",
   },
   "en-US": {
     appTitle: "Markdown Reader",
@@ -139,6 +148,15 @@ const I18N: Record<LangKey, Record<string, string>> = {
     allFiles: "All files",
     openConfig: "Open config folder",
     settingsLanguage: "en-US",
+    menu: "Menu",
+    menuFont: "Font",
+    menuTheme: "Theme",
+    menuLanguage: "Language",
+    menuAbout: "About",
+    themeLight: "Light",
+    themeDark: "Dark",
+    langChinese: "中文",
+    langEnglish: "English",
   },
 };
 
@@ -164,9 +182,7 @@ function applyLanguage() {
   $("btn-font-minus").title = dict.smaller;
   $("btn-font-plus").title = dict.bigger;
   $("btn-width").title = dict.width;
-  $("btn-about").title = dict.about;
-  $("btn-theme").title = dict.theme;
-  elLanguageLabel.textContent = dict.language;
+  $("btn-menu").title = dict.menu;
   $("btn-minimize").title = dict.minimize;
   $("btn-maximize").title = dict.maximize;
   $("btn-close").title = dict.close;
@@ -176,15 +192,17 @@ function applyLanguage() {
   $("btn-check-update").textContent = dict.checkUpdate;
   $("btn-about-close").title = dict.close;
   $("open-config-label")!.textContent = dict.openConfig;
-  elFontFamilySelect.title = dict.font;
   elErrorMsg.textContent = language === "zh-CN" ? dict.loadFailed : "Load failed";
-  $("btn-font-minus").title = dict.smaller;
-  $("btn-font-plus").title = dict.bigger;
-  $("btn-width").title = dict.width;
-  $("btn-about").title = dict.about;
-  $("btn-theme").title = dict.theme;
   $("about-title")!.textContent = dict.aboutTitle;
   $("drop-hint")!.textContent = dict.dropHint;
+
+  // Menu panel
+  $("menu-font-label")!.textContent = dict.menuFont;
+  $("menu-theme-label")!.textContent = dict.menuTheme;
+  $("menu-language-label")!.textContent = dict.menuLanguage;
+  $("menu-about-label")!.textContent = dict.menuAbout;
+  $("menu-theme-value")!.textContent = theme === "light" ? dict.themeLight : dict.themeDark;
+  $("menu-language-value")!.textContent = language === "zh-CN" ? dict.langChinese : dict.langEnglish;
 }
 
 
@@ -298,9 +316,15 @@ appWindow.onDragDropEvent((event) => {
 // ── Recent files ──
 async function toggleRecentPanel() {
   elRecentPanel.classList.toggle("hidden");
+  elMenuPanel.classList.add("hidden");
   if (!elRecentPanel.classList.contains("hidden")) {
     await renderRecentFiles();
   }
+}
+
+async function toggleMenuPanel() {
+  elMenuPanel.classList.toggle("hidden");
+  elRecentPanel.classList.add("hidden");
 }
 
 async function renderRecentFiles() {
@@ -345,6 +369,7 @@ async function clearRecentFiles() {
 async function toggleTheme() {
   theme = theme === "light" ? "dark" : "light";
   applyTheme();
+  applyLanguage(); // Update menu display
   const settings = await invoke<Record<string, unknown>>("get_settings");
   settings.theme = theme;
   await invoke("save_settings", { settings });
@@ -391,7 +416,7 @@ function applyFontFamily() {
     fontFamily === "system" ? DEFAULT_FONT_SANS : `"${fontFamily.replace(/"/g, '\\"')}", ${DEFAULT_FONT_SANS}`;
   document.documentElement.style.setProperty("--font-sans", family);
   document.body.style.fontFamily = family;
-  elFontFamilySelect.value = fontFamily;
+  elMenuFontSelect.value = fontFamily;
 }
 
 // ── Line width ──
@@ -426,7 +451,7 @@ async function syncWindowButtons() {
 async function loadSystemFonts() {
   systemFonts = await invoke<string[]>("list_system_fonts");
   const options = ["system", ...systemFonts];
-  elFontFamilySelect.innerHTML = options
+  elMenuFontSelect.innerHTML = options
     .map((font) => `<option value="${escapeHtml(font)}">${escapeHtml(font === "system" ? t("selectedFont") : font)}</option>`)
     .join("");
 
@@ -453,6 +478,13 @@ document.addEventListener("click", (e) => {
   ) {
     elRecentPanel.classList.add("hidden");
   }
+  if (
+    !elMenuPanel.classList.contains("hidden") &&
+    !elMenuPanel.contains(target) &&
+    !$("btn-menu").contains(target)
+  ) {
+    elMenuPanel.classList.add("hidden");
+  }
 });
 
 // ── Close About modal on overlay click ──
@@ -470,6 +502,7 @@ document.addEventListener("keydown", async (e) => {
   }
   if (e.key === "Escape") {
     elRecentPanel.classList.add("hidden");
+    elMenuPanel.classList.add("hidden");
     closeAbout();
   }
 });
@@ -478,8 +511,7 @@ document.addEventListener("keydown", async (e) => {
 $("btn-open").addEventListener("click", openFile);
 $("btn-recent").addEventListener("click", toggleRecentPanel);
 $("btn-clear-recent").addEventListener("click", clearRecentFiles);
-$("btn-language").addEventListener("click", toggleLanguage);
-$("btn-theme").addEventListener("click", toggleTheme);
+$("btn-menu").addEventListener("click", toggleMenuPanel);
 $("btn-font-minus").addEventListener("click", () => changeFontSize(-1));
 $("btn-font-plus").addEventListener("click", () => changeFontSize(1));
 $("btn-retry").addEventListener("click", openFile);
@@ -490,8 +522,13 @@ $("btn-maximize").addEventListener("click", async () => {
   await syncWindowButtons();
 });
 $("btn-close").addEventListener("click", () => appWindow.close());
-elFontFamilySelect.addEventListener("change", (e) => changeFontFamily((e.target as HTMLSelectElement).value));
-$("btn-about").addEventListener("click", openAbout);
+elMenuFontSelect.addEventListener("change", (e) => changeFontFamily((e.target as HTMLSelectElement).value));
+$("menu-theme").addEventListener("click", toggleTheme);
+$("menu-language").addEventListener("click", toggleLanguage);
+$("menu-about").addEventListener("click", () => {
+  elMenuPanel.classList.add("hidden");
+  openAbout();
+});
 $("btn-about-close").addEventListener("click", closeAbout);
 $("btn-check-update").addEventListener("click", checkUpdate);
 $("btn-open-config").addEventListener("click", openConfigFolder);
@@ -548,7 +585,7 @@ async function init() {
   });
 
   await loadSystemFonts();
-  elFontFamilySelect.value = fontFamily;
+  elMenuFontSelect.value = fontFamily;
 
   applyTheme();
   applyLanguage();

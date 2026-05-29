@@ -252,6 +252,89 @@ body {
   box-shadow: var(--shadow), 0 8px 24px rgba(0,0,0,0.3);
 }
 
+/* Menu panel */
+.menu-panel {
+  position: absolute;
+  top: 48px;
+  right: 16px;
+  width: 240px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), 0 8px 24px rgba(0,0,0,0.08);
+  z-index: 100;
+  overflow: hidden;
+  transition: background var(--transition), border-color var(--transition);
+  padding: 4px;
+}
+
+[data-theme="dark"] .menu-panel {
+  box-shadow: var(--shadow), 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--fg);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+
+.menu-button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.menu-button:hover {
+  background: var(--bg-hover);
+}
+
+.menu-label {
+  font-size: 13px;
+  color: var(--fg-secondary);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.menu-select {
+  flex: 1;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.menu-select:hover,
+.menu-select:focus {
+  background: var(--bg-hover);
+  outline: none;
+}
+
+.menu-value {
+  font-size: 13px;
+  color: var(--fg-tertiary);
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+
 .recent-header {
   display: flex;
   align-items: center;
