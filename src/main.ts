@@ -499,7 +499,23 @@ $("btn-open-config").addEventListener("click", openConfigFolder);
 // ── Init ──
 const GITHUB_URL = "https://github.com/CmcnPro/MarkdownReader";
 
+let platform: string = "windows";
+
+async function detectPlatform() {
+  try {
+    platform = await invoke<string>("get_platform");
+  } catch {
+    // fallback to windows behavior
+  }
+  if (platform === "macos") {
+    document.body.classList.add("platform-macos");
+    const wc = document.querySelector(".window-controls") as HTMLElement | null;
+    if (wc) wc.style.display = "none";
+  }
+}
+
 async function init() {
+  await detectPlatform();
   try {
     const settings = await invoke<{
       theme: string;

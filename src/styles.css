@@ -754,7 +754,16 @@ body {
   text-decoration: underline;
 }
 
-/* Decorum overlay titlebar */
+/* macOS: leave room for native traffic lights on the left */
+body.platform-macos .toolbar {
+  padding-left: 80px;
+}
+
+body.platform-macos .window-controls {
+  display: none !important;
+}
+
+
 [data-tauri-decorum-tb] {
   background: var(--toolbar-bg);
   border-bottom: 1px solid var(--toolbar-border);

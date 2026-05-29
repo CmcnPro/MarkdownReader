@@ -203,11 +203,36 @@ fn get_config_dir() -> String {
 #[tauri::command]
 fn open_config_dir() -> Result<(), String> {
     let dir = config_dir();
-    Command::new("explorer")
-        .arg(dir)
-        .spawn()
-        .map(|_| ())
-        .map_err(|e| e.to_string())
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(dir)
+            .spawn()
+            .map(|_| ())
+            .map_err(|e| e.to_string())
+    }
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(dir)
+            .spawn()
+            .map(|_| ())
+            .map_err(|e| e.to_string())
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        Err("Unsupported platform".into())
+    }
+}
+
+#[tauri::command]
+fn get_platform() -> &'static str {
+    #[cfg(target_os = "macos")]
+    { "macos" }
+    #[cfg(target_os = "windows")]
+    { "windows" }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    { "other" }
 }
 
 #[derive(Deserialize)]
@@ -271,6 +296,7 @@ pub fn run() {
             get_config_dir,
             open_config_dir,
             check_update,
+            get_platform,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Markdown Reader");

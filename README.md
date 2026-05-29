@@ -22,6 +22,7 @@ Current release: v0.1.2.
 - Check for updates from GitHub Releases
 - Open the config folder from About
 - Portable — no installation required, config stored in user directory
+- Native window chrome: macOS uses system traffic lights, Windows uses custom titlebar buttons
 
 ## Screenshot
 
@@ -33,7 +34,9 @@ Current release: v0.1.2.
 
 ### Download
 
-Go to [Releases](https://github.com/CmcnPro/MarkdownReader/releases) and download the latest `.exe` or portable package for v0.1.2.
+Go to [Releases](https://github.com/CmcnPro/MarkdownReader/releases) and download the latest package for v0.1.2:
+- **Windows**: `.exe` installer or portable package
+- **macOS**: `.dmg` or `.app` bundle
 
 ### Build from Source
 

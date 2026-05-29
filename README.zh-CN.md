@@ -22,6 +22,7 @@
 - 检查 GitHub Releases 新版本更新
 - 在 About 中打开配置文件夹
 - 便携免安装，配置存储在用户目录
+- 原生窗口样式：macOS 使用系统 traffic lights，Windows 使用自定义标题栏按钮
 
 ## 截图
 
@@ -33,7 +34,9 @@
 
 ### 下载
 
-前往 [Releases](https://github.com/CmcnPro/MarkdownReader/releases) 页面下载 v0.1.2 的最新 `.exe` 或便携版。
+前往 [Releases](https://github.com/CmcnPro/MarkdownReader/releases) 页面下载 v0.1.2 的最新安装包：
+- **Windows**：`.exe` 安装包或便携版
+- **macOS**：`.dmg` 或 `.app` 应用包
 
 ### 从源码构建
 
