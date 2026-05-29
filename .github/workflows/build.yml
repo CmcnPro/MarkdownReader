@@ -89,6 +89,12 @@ jobs:
           name: windows-${{ matrix.arch }}-portable
           path: src-tauri/target/${{ matrix.target }}/release/*.exe
 
+      - name: Package portable app (macOS)
+        if: startsWith(matrix.platform, 'macos')
+        run: |
+          cd src-tauri/target/${{ matrix.target }}/release/bundle/macos
+          zip -r MarkdownReader-${{ matrix.arch }}.app.zip *.app
+
       - name: Upload artifacts (macOS)
         if: startsWith(matrix.platform, 'macos')
         uses: actions/upload-artifact@v4
@@ -96,14 +102,14 @@ jobs:
           name: macos-${{ matrix.arch }}
           path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
-            src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.app
+            src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.zip
 
       - name: Upload portable app (macOS)
         if: startsWith(matrix.platform, 'macos')
         uses: actions/upload-artifact@v4
         with:
           name: macos-${{ matrix.arch }}-portable
-          path: src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.app
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.zip
 
   release:
     needs: build
@@ -138,12 +144,15 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/windows-x64/**/*
-            artifacts/windows-x64-portable/**/*
-            artifacts/macos-aarch64/**/*
-            artifacts/macos-aarch64-portable/**/*
-            artifacts/macos-x64/**/*
-            artifacts/macos-x64-portable/**/*
+            artifacts/windows-x64/*.msi
+            artifacts/windows-x64/*.exe
+            artifacts/windows-x64-portable/*.exe
+            artifacts/macos-aarch64/*.dmg
+            artifacts/macos-aarch64/*.zip
+            artifacts/macos-aarch64-portable/*.zip
+            artifacts/macos-x64/*.dmg
+            artifacts/macos-x64/*.zip
+            artifacts/macos-x64-portable/*.zip
           draft: false
           prerelease: false
           body_path: release-notes.md
