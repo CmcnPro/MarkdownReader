@@ -53,6 +53,15 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Verify icon files exist
+        run: |
+          if [ "${{ matrix.platform }}" = "windows-latest" ]; then
+            ls -la src-tauri/icons/icon.ico
+          else
+            ls -la src-tauri/icons/icon.icns
+          fi
+        shell: bash
+
       - name: Build Tauri app
         run: npm run tauri build -- --target ${{ matrix.target }}
 
