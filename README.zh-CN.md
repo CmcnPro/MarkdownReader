@@ -1,5 +1,7 @@
 # Markdown Reader
 
+[![Build and Release](https://github.com/CmcnPro/MarkdownReader/actions/workflows/build.yml/badge.svg)](https://github.com/CmcnPro/MarkdownReader/actions/workflows/build.yml)
+
 [English](./README.md)
 
 一个基于 Rust + Tauri 2 构建的轻量级 Markdown 桌面阅读器，专为分享 `.md` 文件而设计 — 拖拽即可阅读。
