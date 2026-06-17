@@ -25,6 +25,14 @@ A lightweight, portable Markdown reader built with Rust and Tauri 2. Designed fo
 - Portable — no installation required, config stored in user directory
 - Native window chrome: macOS uses system traffic lights, Windows uses custom titlebar buttons
 
+## Latest Changes
+
+### v0.1.4
+
+- Fixed the Windows custom titlebar layout so minimize, maximize, and close remain visible in small windows even when the opened file name is very long.
+- Improved narrow-window toolbar behavior by letting the file name truncate first and hiding secondary controls only at compact widths.
+- Release notes are now generated against the previous Git tag automatically.
+
 ## Screenshot
 
 ![Overview](docs/screenshots/01-overview.png)

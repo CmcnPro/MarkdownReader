@@ -134,10 +134,19 @@ jobs:
 
       - name: Generate release notes
         run: |
+          previous_tag="$(git describe --tags --abbrev=0 "${{ github.ref_name }}^" 2>/dev/null || true)"
           {
-            echo "## Changes since v0.1.2"
+            if [ -n "$previous_tag" ]; then
+              echo "## Changes since $previous_tag"
+            else
+              echo "## Changes"
+            fi
             echo
-            git log --pretty=format:'- %s' v0.1.2..${{ github.ref_name }}
+            if [ -n "$previous_tag" ]; then
+              git log --pretty=format:'- %s' "$previous_tag"..${{ github.ref_name }}
+            else
+              git log --pretty=format:'- %s' ${{ github.ref_name }}
+            fi
           } > release-notes.md
 
       - name: Create Release

@@ -98,9 +98,19 @@ body {
   z-index: 11;
 }
 
+.toolbar-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.toolbar-right {
+  flex: 0 0 auto;
+}
+
 .window-controls {
   display: flex;
   align-items: stretch;
+  flex: 0 0 auto;
   gap: 4px;
   margin-left: 4px;
   -webkit-app-region: no-drag;
@@ -133,6 +143,7 @@ body {
 }
 
 .app-title {
+  flex: 0 0 auto;
   font-size: 13px;
   font-weight: 600;
   color: var(--fg-secondary);
@@ -140,6 +151,8 @@ body {
 }
 
 .file-name {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 13px;
   color: var(--fg);
   max-width: 300px;
@@ -230,6 +243,44 @@ body {
   min-width: 36px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    padding: 0 8px 0 12px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    gap: 4px;
+  }
+
+  .file-name {
+    max-width: none;
+  }
+
+  #btn-open span {
+    display: none;
+  }
+
+  .toolbar-btn {
+    padding: 6px 8px;
+  }
+
+  .toolbar-divider {
+    margin: 0 2px;
+  }
+}
+
+@media (max-width: 560px) {
+  #btn-recent,
+  #btn-font-minus,
+  #font-size-display,
+  #btn-font-plus,
+  #btn-width,
+  .toolbar-right > .toolbar-divider:nth-of-type(-n + 3) {
+    display: none;
+  }
 }
 
 /* Recent panel */
